@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>AI Text Summarizer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #0d9488;
+    --primary-dark: #0f766e;
+    --primary-light: #ccfbf1;
+    --accent: #10b981;
+    --background: #f8fafc;
+    --card: #ffffff;
+    --text: #334155;
+    --text-light: #64748b;
+    --border: #e2e8f0;
+    --radius-lg: 16px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+    --transition: all 0.2s ease;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html, body {
+    height: 100%;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--background);
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  header {
+    background: var(--primary);
+    color: white;
+    padding: 1.25rem 0;
+    text-align: center;
+    box-shadow: var(--shadow-md);
+    font-size: 1.25rem;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+  }
+
+  .header-icon {
+    font-size: 1.5rem;
+  }
+
+  .page {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+  }
+
+  .container {
+    display: flex;
+    gap: 1.5rem;
+    align-items: stretch;
+  }
+
+  .card {
+    background: var(--card);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    flex: 1;
+    min-height: 500px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border);
+    transition: var(--transition);
+  }
+
+  .card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  h2 {
+    color: var(--primary-dark);
+    font-size: 1.25rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .card-icon {
+    color: var(--primary);
+    font-size: 1.25rem;
+  }
+
+  /* Input area */
+  .input-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  textarea {
+    width: 100%;
+    flex: 1;
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    resize: none;
+    font-family: inherit;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    background: white;
+    transition: var(--transition);
+  }
+
+  textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+  }
+
+  textarea::placeholder {
+    color: var(--text-light);
+    opacity: 0.6;
+  }
+
+  /* Buttons */
+  .btn-group {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+  }
+
+  .btn {
+    padding: 0.625rem 1.25rem;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    border: none;
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    color: white;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .btn-primary:hover {
+    background: var(--primary-dark);
+    box-shadow: var(--shadow-md);
+  }
+
+  .btn-primary:active {
+    transform: scale(0.98);
+  }
+
+  .btn-secondary {
+    background: white;
+    color: var(--primary-dark);
+    border: 1px solid var(--border);
+  }
+
+  .btn-secondary:hover {
+    background: #f8fafc;
+    border-color: var(--primary-light);
+  }
+
+  .btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  /* Summary area */
+  .summary-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .summary-content {
+    background: #f8fafc;
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    flex: 1;
+    overflow: auto;
+    border: 1px solid var(--border);
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    color: var(--text);
+    transition: var(--transition);
+  }
+
+  .summary-placeholder {
+    color: var(--text-light);
+    font-style: italic;
+    opacity: 0.7;
+  }
+
+  /* Stats */
+  .stats {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.8125rem;
+    color: var(--text-light);
+  }
+
+  .stat {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .stat-icon {
+    font-size: 0.875rem;
+  }
+
+  /* Spinner */
+  .spinner-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+  }
+
+  .spinner {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    border: 3px solid rgba(0,0,0,0.05);
+    border-top-color: var(--primary);
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Toast notification */
+  .toast {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--primary-dark);
+    color: white;
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .toast.show {
+    opacity: 1;
+  }
+
+  .toast-icon {
+    font-size: 1.25rem;
+  }
+
+  /* Responsiveness */
+  @media (max-width: 768px) {
+    .container {
+      flex-direction: column;
+    }
+    
+    .card {
+      min-height: 400px;
+    }
+    
+    .btn-group {
+      flex-wrap: wrap;
+    }
+  }
+
+  /* Character counter */
+  .char-counter {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    text-align: right;
+    margin-top: 0.25rem;
+  }
+
+  .char-counter.warning {
+    color: #f59e0b;
+  }
+
+  .char-counter.error {
+    color: #ef4444;
+  }
+</style>
+</head>
+<body>
+<header>
+  <span class="header-icon">✍️</span>
+  <span>AI Text Summarizer</span>
+</header>
+
+<main class="page">
+  <div class="container">
+    <!-- Input Card -->
+    <section class="card">
+      <div class="card-header">
+        <h2><span class="card-icon">📥</span> Input Text</h2>
+        <div class="stats">
+          <div class="stat">
+            <span class="stat-icon">⏱️</span>
+            <span id="readTime">0 min read</span>
+          </div>
+        </div>
+      </div>
+      
+      <form id="summaryForm" class="input-area">
+        <textarea id="inputText" name="input_text" placeholder="Paste or type your text here to summarize..."></textarea>
+        <div class="char-counter" id="charCounter">0 characters</div>
+        
+        <div class="btn-group">
+          <div class="stats">
+            <div class="stat">
+              <span class="stat-icon">ℹ️</span>
+              <span>Supports long documents</span>
+            </div>
+          </div>
+          <div style="display: flex; gap: 0.75rem;">
+            <button class="btn btn-secondary" type="button" id="clearBtn">
+              <span>🗑️</span>
+              <span>Clear</span>
+            </button>
+            <button class="btn btn-primary" id="submitBtn" type="submit">
+              <span>✨</span>
+              <span>Summarize</span>
+            </button>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <!-- Output Card -->
+    <section class="card">
+      <div class="card-header">
+        <h2><span class="card-icon">📄</span> Summary</h2>
+        <div class="stats">
+          <div class="stat">
+            <span class="stat-icon">📊</span>
+            <span id="reductionStat">-</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="summary-container">
+        <div class="summary-content" id="summaryShell">
+          <div class="summary-placeholder">Your summarized text will appear here...</div>
+        </div>
+        
+        <div class="btn-group">
+          <div id="statusText" class="stats">
+            <div class="stat">
+              <span class="stat-icon">🔍</span>
+              <span>Ready</span>
+            </div>
+          </div>
+          <button class="btn btn-secondary" id="copyBtn">
+            <span>📋</span>
+            <span>Copy</span>
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // DOM Elements
+  const form = document.getElementById("summaryForm");
+  const input = document.getElementById("inputText");
+  const submitBtn = document.getElementById("submitBtn");
+  const summaryShell = document.getElementById("summaryShell");
+  const statusText = document.getElementById("statusText");
+  const clearBtn = document.getElementById("clearBtn");
+  const copyBtn = document.getElementById("copyBtn");
+  const charCounter = document.getElementById("charCounter");
+  const readTime = document.getElementById("readTime");
+  const reductionStat = document.getElementById("reductionStat");
+  const toast = document.getElementById("toast");
+
+  // Character counter and read time
+  input.addEventListener("input", updateStats);
+  
+  function updateStats() {
+    const text = input.value;
+    const charCount = text.length;
+    const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+    const minutes = Math.ceil(wordCount / 200); // Average reading speed
+    
+    charCounter.textContent = `${charCount.toLocaleString()} characters`;
+    
+    // Update character counter color based on length
+    if (charCount > 5000) {
+      charCounter.classList.add('error');
+      charCounter.classList.remove('warning');
+    } else if (charCount > 2000) {
+      charCounter.classList.add('warning');
+      charCounter.classList.remove('error');
+    } else {
+      charCounter.classList.remove('warning', 'error');
+    }
+    
+    readTime.textContent = `${minutes} min read`;
+  }
+
+  // Clear button
+  clearBtn.addEventListener("click", () => {
+    input.value = "";
+    input.focus();
+    updateStats();
+    showToast("Cleared input");
+  });
+
+  // Copy button
+  copyBtn.addEventListener("click", () => {
+    const text = summaryShell.textContent.trim();
+    if (!text || summaryShell.querySelector('.summary-placeholder')) return;
+    
+    navigator.clipboard?.writeText(text).then(() => {
+      showToast("Copied to clipboard!");
+    }).catch(() => {
+      showToast("Failed to copy");
+    });
+  });
+
+  // Form submission
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const text = input.value.trim();
+    
+    if (!text) {
+      showToast("Please enter some text");
+      return;
+    }
+
+    // UI updates
+    submitBtn.disabled = true;
+    clearBtn.disabled = true;
+    updateStatus("Summarizing...", "⏳");
+    
+    // Show spinner
+    summaryShell.innerHTML = `
+      <div class="spinner-container">
+        <div class="spinner"></div>
+      </div>
+    `;
+
+    try {
+      const formData = new FormData();
+      formData.append("input_text", text);
+
+      const startTime = performance.now();
+      
+      const resp = await fetch("/predict", {
+        method: "POST",
+        body: formData,
+        headers: {
+          "X-Requested-With": "XMLHttpRequest",
+          "Accept": "application/json"
+        }
+      });
+
+      const duration = ((performance.now() - startTime) / 1000).toFixed(1);
+
+      if (!resp.ok) {
+        throw new Error(resp.statusText);
+      }
+
+      const data = await resp.json();
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      // Update UI with results
+      summaryShell.innerHTML = data.summary || "";
+      updateStatus(`Done in ${duration}s`, "✅");
+      
+      // Calculate reduction percentage
+      if (data.summary) {
+        const originalLength = text.length;
+        const summaryLength = data.summary.length;
+        const reduction = Math.round((1 - (summaryLength / originalLength)) * 100);
+        reductionStat.textContent = `${reduction}% reduced`;
+      }
+      
+      showToast("Summary generated!");
+    } catch (err) {
+      console.error("Summarization error:", err);
+      summaryShell.innerHTML = `
+        <div style="color: #ef4444; text-align: center; padding: 1rem;">
+          Error: ${err.message || "Failed to generate summary"}
+        </div>
+      `;
+      updateStatus("Failed", "❌");
+      showToast("Failed to generate summary");
+    } finally {
+      submitBtn.disabled = false;
+      clearBtn.disabled = false;
+    }
+  });
+
+  // Helper functions
+  function updateStatus(text, icon = "") {
+    statusText.innerHTML = `
+      <div class="stat">
+        <span class="stat-icon">${icon}</span>
+        <span>${text}</span>
+      </div>
+    `;
+  }
+
+  function showToast(message) {
+    toast.innerHTML = `
+      <span class="toast-icon">ℹ️</span>
+      <span>${message}</span>
+    `;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  }
+
+  // Initialize
+  updateStats();
+</script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+stages:
+  data_ingestion:
+    cmd: python src/TextSummarization/pipeline/data_ingestion_pipeline.py
+    deps:
+      - src/TextSummarization/pipeline/data_ingestion_pipeline.py
+    outs:
+      - artifacts/data_ingestion
+
+  data_validation:
+    cmd: python src/TextSummarization/pipeline/data_validation_pipeline.py
+    deps:
+      - src/TextSummarization/pipeline/data_validation_pipeline.py
+      - artifacts/data_ingestion
+    outs:
+      - artifacts/data_validation
+
+  data_transformation:
+    cmd: python src/TextSummarization/pipeline/data_transformation_pipeline.py
+    deps:
+      - src/TextSummarization/pipeline/data_transformation_pipeline.py
+      - artifacts/data_ingestion
+    outs:
+      - artifacts/data_transformation
+
+  model_trainer:
+    cmd: python src/TextSummarization/pipeline/model_training_pipeline.py
+    deps:
+      - src/TextSummarization/pipeline/model_training_pipeline.py
+      - artifacts/data_transformation
+    outs:
+      - artifacts/model_trainer
+
+  model_evaluation:
+    cmd: python src/TextSummarization/pipeline/model_evaluation_pipeline.py
+    deps:
+      - src/TextSummarization/pipeline/model_evaluation_pipeline.py
+      - artifacts/data_transformation
+      - artifacts/model_trainer
+    outs:
+      - artifacts/model_evaluation

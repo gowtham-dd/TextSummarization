@@ -1,0 +1,92 @@
+schema: '2.0'
+stages:
+  data_ingestion:
+    cmd: python src/TextSummarization/pipeline/data_ingestion_pipeline.py
+    deps:
+    - path: src/TextSummarization/pipeline/data_ingestion_pipeline.py
+      hash: md5
+      md5: d65c7317b547c160e8157dc5e79fb38f
+      size: 926
+    outs:
+    - path: artifacts/data_ingestion
+      hash: md5
+      md5: 70ee0b32b51dd644ea1ce369399aea16.dir
+      size: 53881318
+      nfiles: 17
+  data_validation:
+    cmd: python src/TextSummarization/pipeline/data_validation_pipeline.py
+    deps:
+    - path: artifacts/data_ingestion
+      hash: md5
+      md5: 70ee0b32b51dd644ea1ce369399aea16.dir
+      size: 53881318
+      nfiles: 17
+    - path: src/TextSummarization/pipeline/data_validation_pipeline.py
+      hash: md5
+      md5: 463dd81b257a829aadf425bb55cab90c
+      size: 984
+    outs:
+    - path: artifacts/data_validation
+      hash: md5
+      md5: 0ccb3ea5849272ff03be5ab71786b9ff.dir
+      size: 23
+      nfiles: 1
+  data_transformation:
+    cmd: python src/TextSummarization/pipeline/data_transformation_pipeline.py
+    deps:
+    - path: artifacts/data_ingestion
+      hash: md5
+      md5: 70ee0b32b51dd644ea1ce369399aea16.dir
+      size: 53881318
+      nfiles: 17
+    - path: src/TextSummarization/pipeline/data_transformation_pipeline.py
+      hash: md5
+      md5: 2165e047633d4c09b98a83bdb15eef86
+      size: 1007
+    outs:
+    - path: artifacts/data_transformation
+      hash: md5
+      md5: bcdc0e728cd4ec336fcb9a28482cb8d5.dir
+      size: 24998323
+      nfiles: 10
+  model_trainer:
+    cmd: python src/TextSummarization/pipeline/model_training_pipeline.py
+    deps:
+    - path: artifacts/data_transformation
+      hash: md5
+      md5: bcdc0e728cd4ec336fcb9a28482cb8d5.dir
+      size: 24998323
+      nfiles: 10
+    - path: src/TextSummarization/pipeline/model_training_pipeline.py
+      hash: md5
+      md5: 82d981ad98f3a797e51bf89b7a26198d
+      size: 957
+    outs:
+    - path: artifacts/model_trainer
+      hash: md5
+      md5: bda8e10246d5c98ad0f0c553ff90d20f.dir
+      size: 2292192764
+      nfiles: 7
+  model_evaluation:
+    cmd: python src/TextSummarization/pipeline/model_evaluation_pipeline.py
+    deps:
+    - path: artifacts/data_transformation
+      hash: md5
+      md5: bcdc0e728cd4ec336fcb9a28482cb8d5.dir
+      size: 24998323
+      nfiles: 10
+    - path: artifacts/model_trainer
+      hash: md5
+      md5: bda8e10246d5c98ad0f0c553ff90d20f.dir
+      size: 2292192764
+      nfiles: 7
+    - path: src/TextSummarization/pipeline/model_evaluation_pipeline.py
+      hash: md5
+      md5: 0cc66479ae8e67282e84eb13d90b6910
+      size: 998
+    outs:
+    - path: artifacts/model_evaluation
+      hash: md5
+      md5: 9cd4b5c7ec5f674c4510b5aa4f6076a0.dir
+      size: 72
+      nfiles: 1
